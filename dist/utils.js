@@ -20,4 +20,7 @@ export function mapValue(value, originMin, originMax, targetMin, targetMax) {
     var share = (value - originMin) / originRange;
     return share * targetRange + targetMin;
 }
+export function sigmoid(x) {
+    return 1 / (1 + Math.exp(-x));
+}
 //# sourceMappingURL=utils.js.map
