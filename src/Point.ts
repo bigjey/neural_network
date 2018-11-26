@@ -1,4 +1,4 @@
-import { F } from "./constants.js";
+export const F = (x: number): number => 2 * x + 1;
 
 export class Point {
   x: number;
@@ -16,7 +16,7 @@ export class Point {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = '#000';
     ctx.lineWidth = 1;
 
     ctx.beginPath();
