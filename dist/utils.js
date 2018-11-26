@@ -23,4 +23,7 @@ export function mapValue(value, originMin, originMax, targetMin, targetMax) {
 export function sigmoid(x) {
     return 1 / (1 + Math.exp(-x));
 }
+export function sigmoidPrime(x) {
+    return x * (1 - x);
+}
 //# sourceMappingURL=utils.js.map

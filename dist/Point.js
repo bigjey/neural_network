@@ -1,4 +1,4 @@
-import { F } from "./constants.js";
+export var F = function (x) { return 2 * x + 1; };
 var Point = /** @class */ (function () {
     function Point(x, y) {
         this.x = x;
@@ -7,7 +7,7 @@ var Point = /** @class */ (function () {
         this.target = y >= F(x) ? 1 : -1;
     }
     Point.prototype.draw = function (ctx) {
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = '#000';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);

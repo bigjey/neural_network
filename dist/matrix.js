@@ -13,7 +13,7 @@ var Matrix = /** @class */ (function () {
                 this.values[i] = [n[i]];
             }
         }
-        else if (typeof n === "number") {
+        else if (typeof n === 'number') {
             this.rows = n;
             this.cols = m;
             this.values = new Array(this.rows);
@@ -33,24 +33,38 @@ var Matrix = /** @class */ (function () {
         }
         return this;
     };
-    Matrix.add = function (m, n) {
-        if (typeof n !== "number" && !(n instanceof Matrix)) {
-            throw new Error("lol");
+    Matrix.from = function (arr) {
+        if (!arr.length || !arr[0].length) {
+            throw new Error('bad param');
         }
-        var MM = new Matrix(m.rows, m.cols);
-        for (var i = 0; i < MM.rows; i++) {
-            for (var j = 0; j < MM.cols; j++) {
-                if (typeof n === "number") {
-                    MM.values[i][j] = m.values[i][j] + n;
+        var M = new Matrix(arr.length, arr[0].length);
+        M.values = arr;
+        return M;
+    };
+    Matrix.add = function (A, B) {
+        if (typeof B !== 'number' && !(B instanceof Matrix)) {
+            throw new Error('lol');
+        }
+        if (B instanceof Matrix && (A.rows !== B.rows || A.cols !== B.cols)) {
+            throw new Error('wrong matrices dimensions');
+        }
+        var C = new Matrix(A.rows, A.cols);
+        for (var i = 0; i < C.rows; i++) {
+            for (var j = 0; j < C.cols; j++) {
+                if (typeof B === 'number') {
+                    C.values[i][j] = A.values[i][j] + B;
                 }
-                else if (n instanceof Matrix) {
-                    MM.values[i][j] = m.values[i][j] + n.values[i][j];
+                else if (B instanceof Matrix) {
+                    C.values[i][j] = A.values[i][j] + B.values[i][j];
                 }
             }
         }
-        return MM;
+        return C;
     };
     Matrix.subtract = function (A, B) {
+        if (A.rows !== B.rows || A.cols !== B.cols) {
+            throw new Error('wrong matrices dimensions');
+        }
         var MM = new Matrix(A.rows, A.cols);
         for (var i = 0; i < A.rows; i++) {
             for (var j = 0; j < A.cols; j++) {
@@ -59,31 +73,34 @@ var Matrix = /** @class */ (function () {
         }
         return MM;
     };
-    Matrix.multiply = function (m, n) {
-        if (typeof n !== "number" && !(n instanceof Matrix)) {
-            throw new Error("lol");
+    Matrix.multiply = function (A, B) {
+        if (typeof B !== 'number' && !(B instanceof Matrix)) {
+            throw new Error('lol');
         }
-        var MM = new Matrix(m.rows, m.cols);
-        for (var i = 0; i < MM.rows; i++) {
-            for (var j = 0; j < MM.cols; j++) {
-                if (typeof n === "number") {
-                    MM.values[i][j] = m.values[i][j] * n;
+        if (B instanceof Matrix && (A.rows !== B.rows || A.cols !== B.cols)) {
+            throw new Error('wrong matrices dimensions');
+        }
+        var C = new Matrix(A.rows, A.cols);
+        for (var i = 0; i < C.rows; i++) {
+            for (var j = 0; j < C.cols; j++) {
+                if (typeof B === 'number') {
+                    C.values[i][j] = A.values[i][j] * B;
                 }
-                else if (n instanceof Matrix) {
-                    MM.values[i][j] = m.values[i][j] * n.values[i][j];
+                else if (B instanceof Matrix) {
+                    C.values[i][j] = A.values[i][j] * B.values[i][j];
                 }
             }
         }
-        return MM;
+        return C;
     };
-    Matrix.map = function (m, fn) {
-        var MM = new Matrix(m.rows, m.cols);
-        for (var i = 0; i < MM.rows; i++) {
-            for (var j = 0; j < MM.cols; j++) {
-                MM.values[i][j] = fn(MM.values[i][j]);
+    Matrix.map = function (A, fn) {
+        var B = new Matrix(A.rows, A.cols);
+        for (var i = 0; i < B.rows; i++) {
+            for (var j = 0; j < B.cols; j++) {
+                B.values[i][j] = fn(A.values[i][j]);
             }
         }
-        return MM;
+        return B;
     };
     Matrix.product = function (A, B) {
         if (A.cols !== B.rows) {
@@ -99,14 +116,14 @@ var Matrix = /** @class */ (function () {
         }
         return C;
     };
-    Matrix.transpose = function (M) {
-        var MM = new Matrix(M.cols, M.rows);
-        for (var i = 0; i < M.rows; i++) {
-            for (var j = 0; j < M.cols; j++) {
-                MM.values[j][i] = M.values[i][j];
+    Matrix.transpose = function (A) {
+        var B = new Matrix(A.cols, A.rows);
+        for (var i = 0; i < A.rows; i++) {
+            for (var j = 0; j < A.cols; j++) {
+                B.values[j][i] = A.values[i][j];
             }
         }
-        return MM;
+        return B;
     };
     return Matrix;
 }());
