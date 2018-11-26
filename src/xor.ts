@@ -9,7 +9,7 @@ const SIZE: number = 10;
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
 
-const network = new Perceptron(2, 2, 1, 0.05);
+const network = new Perceptron(2, 4, 1, 0.05);
 
 const trainingData = [
   {

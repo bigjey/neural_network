@@ -6,7 +6,7 @@ var H = 600;
 var SIZE = 10;
 var canvas;
 var ctx;
-var network = new Perceptron(2, 2, 1, 0.05);
+var network = new Perceptron(2, 4, 1, 0.05);
 var trainingData = [
     {
         inputs: Matrix.from([[1], [0]]),
