@@ -1,5 +1,7 @@
-type MatrixAdder = number | Matrix;
-interface IMatrixMapper {
+export type MatrixAdder = number | Matrix;
+export type MatrixMultiplier = MatrixAdder;
+
+export interface IMatrixMapper {
   (n: number): number;
 }
 
@@ -23,7 +25,7 @@ export class Matrix implements IMatrix {
       for (var i = 0; i < this.rows; i++) {
         this.values[i] = [n[i]];
       }
-    } else if (typeof n === "number") {
+    } else if (typeof n === 'number') {
       this.rows = <number>n;
       this.cols = m;
 
@@ -48,27 +50,47 @@ export class Matrix implements IMatrix {
     return this;
   }
 
-  static add(m: Matrix, n: MatrixAdder): Matrix {
-    if (typeof n !== "number" && !(n instanceof Matrix)) {
-      throw new Error("lol");
+  static from(arr: number[][]): Matrix {
+    if (!arr.length || !arr[0].length) {
+      throw new Error('bad param');
     }
 
-    let MM = new Matrix(m.rows, m.cols);
+    let M = new Matrix(arr.length, arr[0].length);
 
-    for (var i = 0; i < MM.rows; i++) {
-      for (var j = 0; j < MM.cols; j++) {
-        if (typeof n === "number") {
-          MM.values[i][j] = m.values[i][j] + <number>n;
-        } else if (n instanceof Matrix) {
-          MM.values[i][j] = m.values[i][j] + n.values[i][j];
+    M.values = arr;
+
+    return M;
+  }
+
+  static add(A: Matrix, B: MatrixAdder): Matrix {
+    if (typeof B !== 'number' && !(B instanceof Matrix)) {
+      throw new Error('lol');
+    }
+
+    if (B instanceof Matrix && (A.rows !== B.rows || A.cols !== B.cols)) {
+      throw new Error('wrong matrices dimensions');
+    }
+
+    let C = new Matrix(A.rows, A.cols);
+
+    for (var i = 0; i < C.rows; i++) {
+      for (var j = 0; j < C.cols; j++) {
+        if (typeof B === 'number') {
+          C.values[i][j] = A.values[i][j] + <number>B;
+        } else if (B instanceof Matrix) {
+          C.values[i][j] = A.values[i][j] + B.values[i][j];
         }
       }
     }
 
-    return MM;
+    return C;
   }
 
   static subtract(A: Matrix, B: Matrix) {
+    if (A.rows !== B.rows || A.cols !== B.cols) {
+      throw new Error('wrong matrices dimensions');
+    }
+
     let MM = new Matrix(A.rows, A.cols);
 
     for (var i = 0; i < A.rows; i++) {
@@ -80,36 +102,40 @@ export class Matrix implements IMatrix {
     return MM;
   }
 
-  static multiply(m: Matrix, n: number | Matrix): Matrix {
-    if (typeof n !== "number" && !(n instanceof Matrix)) {
-      throw new Error("lol");
+  static multiply(A: Matrix, B: MatrixMultiplier): Matrix {
+    if (typeof B !== 'number' && !(B instanceof Matrix)) {
+      throw new Error('lol');
     }
 
-    let MM = new Matrix(m.rows, m.cols);
+    if (B instanceof Matrix && (A.rows !== B.rows || A.cols !== B.cols)) {
+      throw new Error('wrong matrices dimensions');
+    }
 
-    for (var i = 0; i < MM.rows; i++) {
-      for (var j = 0; j < MM.cols; j++) {
-        if (typeof n === "number") {
-          MM.values[i][j] = m.values[i][j] * <number>n;
-        } else if (n instanceof Matrix) {
-          MM.values[i][j] = m.values[i][j] * n.values[i][j];
+    let C = new Matrix(A.rows, A.cols);
+
+    for (var i = 0; i < C.rows; i++) {
+      for (var j = 0; j < C.cols; j++) {
+        if (typeof B === 'number') {
+          C.values[i][j] = A.values[i][j] * <number>B;
+        } else if (B instanceof Matrix) {
+          C.values[i][j] = A.values[i][j] * B.values[i][j];
         }
       }
     }
 
-    return MM;
+    return C;
   }
 
-  static map(m: Matrix, fn: IMatrixMapper): Matrix {
-    let MM = new Matrix(m.rows, m.cols);
+  static map(A: Matrix, fn: IMatrixMapper): Matrix {
+    let B = new Matrix(A.rows, A.cols);
 
-    for (var i = 0; i < MM.rows; i++) {
-      for (var j = 0; j < MM.cols; j++) {
-        MM.values[i][j] = fn(MM.values[i][j]);
+    for (var i = 0; i < B.rows; i++) {
+      for (var j = 0; j < B.cols; j++) {
+        B.values[i][j] = fn(A.values[i][j]);
       }
     }
 
-    return MM;
+    return B;
   }
 
   static product(A: Matrix, B: Matrix): Matrix {
@@ -130,15 +156,15 @@ export class Matrix implements IMatrix {
     return C;
   }
 
-  static transpose(M: Matrix): Matrix {
-    let MM = new Matrix(M.cols, M.rows);
+  static transpose(A: Matrix): Matrix {
+    let B = new Matrix(A.cols, A.rows);
 
-    for (var i = 0; i < M.rows; i++) {
-      for (var j = 0; j < M.cols; j++) {
-        MM.values[j][i] = M.values[i][j];
+    for (var i = 0; i < A.rows; i++) {
+      for (var j = 0; j < A.cols; j++) {
+        B.values[j][i] = A.values[i][j];
       }
     }
 
-    return MM;
+    return B;
   }
 }
