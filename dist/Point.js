@@ -1,12 +1,12 @@
-export var F = function (x) { return 2 * x + 1; };
-var Point = /** @class */ (function () {
-    function Point(x, y) {
+export const F = (x) => 2 * x + 1;
+export class Point {
+    constructor(x, y) {
         this.x = x;
         this.y = y;
         this.b = 1;
         this.target = y >= F(x) ? 1 : -1;
     }
-    Point.prototype.draw = function (ctx) {
+    draw(ctx) {
         ctx.fillStyle = '#000';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -18,8 +18,6 @@ var Point = /** @class */ (function () {
         else {
             ctx.stroke();
         }
-    };
-    return Point;
-}());
-export { Point };
+    }
+}
 //# sourceMappingURL=Point.js.map

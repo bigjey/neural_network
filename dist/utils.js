@@ -1,13 +1,11 @@
-export function rand(min, max) {
-    if (max === void 0) { max = 0; }
+export function rand(min, max = 0) {
     if (arguments.length < 2) {
         max = min;
         min = 0;
     }
     return Math.random() * (max - min) + min;
 }
-export function randInt(min, max) {
-    if (max === void 0) { max = 0; }
+export function randInt(min, max = 0) {
     if (arguments.length < 2) {
         max = min;
         min = 0;
@@ -15,9 +13,9 @@ export function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 export function mapValue(value, originMin, originMax, targetMin, targetMax) {
-    var originRange = originMax - originMin;
-    var targetRange = targetMax - targetMin;
-    var share = (value - originMin) / originRange;
+    let originRange = originMax - originMin;
+    let targetRange = targetMax - targetMin;
+    let share = (value - originMin) / originRange;
     return share * targetRange + targetMin;
 }
 export function sigmoid(x) {
