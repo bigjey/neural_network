@@ -36,7 +36,7 @@ var renderImage = function (imgData) {
         ctx.putImageData(pixels, x * imgWidth, y * imgHeight);
     }
 };
-loadData("./../data/flower_data", processData);
-loadData("./../data/cake_data", processData);
-loadData("./../data/stars_data", processData);
+loadData("./data/flower_data", processData);
+loadData("./data/cake_data", processData);
+loadData("./data/stars_data", processData);
 //# sourceMappingURL=bitmap_samples.js.map
