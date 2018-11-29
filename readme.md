@@ -18,4 +18,4 @@ use `node scripts/prepareData --src=path_to_file --samples=number` to extract su
 
 extracted samples will be put in `data` folder
 
-[samples demo][https://bigjey.github.io/neural_network/samples.html]
+[samples demo](https://bigjey.github.io/neural_network/samples.html)
