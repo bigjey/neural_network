@@ -51,6 +51,6 @@ const renderImage = (imgData: Uint8Array) => {
   }
 };
 
-loadData("./../data/flower_data", processData);
-loadData("./../data/cake_data", processData);
-loadData("./../data/stars_data", processData);
+loadData("./data/flower_data", processData);
+loadData("./data/cake_data", processData);
+loadData("./data/stars_data", processData);
