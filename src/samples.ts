@@ -5,14 +5,11 @@ import { Matrix } from "./matrix.js";
 const imgWidth: number = 28;
 const imgHeight: number = 28;
 const imageByteSize: number = imgWidth * imgHeight;
-const headerByteSize: number = 80;
-const cols: number = 32;
-const rows: number = 31;
-const totalSamples: number = 1000;
+const cols: number = 10;
+const rows: number = 10;
+const totalSamples: number = 2000;
 
-let network: Perceptron = new Network(28 * 28, 64, 3, 0.05);
-
-const loadData = (filePath: string) => {
+const loadData = (filePath: string): Promise<Uint8Array> => {
   return new Promise((resolve, reject) => {
     var req = new XMLHttpRequest();
 
@@ -39,9 +36,11 @@ const renderImage = (imgData: Uint8Array) => {
 
   const ctx = <CanvasRenderingContext2D>canvas.getContext("2d");
 
+  let offset = randInt(0, 2000 - cols * rows);
+
   for (var i = 0; i < cols * rows; i++) {
     const pixels = ctx.createImageData(imgWidth, imgHeight);
-    const imgOffset = imageByteSize * i;
+    const imgOffset = imageByteSize * (i + offset);
 
     for (var pixel = 0; pixel < imageByteSize; pixel++) {
       pixels.data[pixel * 4 + 3] = imgData[imgOffset + pixel];
@@ -55,79 +54,110 @@ const renderImage = (imgData: Uint8Array) => {
 };
 
 interface SampleData {
-  training: any[];
-  testing: any[];
+  training: Sample[];
+  testing: Sample[];
 }
 
 interface Sample {
-  inputs: any[];
-  targets: any[];
+  inputs: number[];
+  targets: number[];
   category: number;
 }
 
-interface Labels {
-  [key: number]: string;
+interface Category {
+  title: string;
+  file: string;
 }
 
-const CATEGORIES: Labels = {
-  0: "Flower",
-  1: "Cake",
-  2: "Star"
-};
+const categories: Category[] = [
+  {
+    title: "Banana",
+    file: "banana_data"
+  },
+  {
+    title: "Bed",
+    file: "bed_data"
+  },
+  { title: "Bus", file: "bus_data" },
+  { title: "Cake", file: "cake_data" },
+  { title: "Crab", file: "crab_data" },
+  { title: "Donut", file: "donut_data" },
+  { title: "Floor Lamp", file: "floor_lamp_data" },
+  { title: "Flower", file: "flower_data" },
+  { title: "Hammer", file: "hammer_data" },
+  { title: "House", file: "house_data" },
+  { title: "Mushroom", file: "mushroom_data" },
+  { title: "Pizza", file: "pizza_data" },
+  { title: "Skull", file: "skull_data" },
+  { title: "Stairs", file: "stairs_data" },
+  { title: "Star", file: "star_data" },
+  { title: "Tornado", file: "tornado_data" },
+  { title: "Washing Machine", file: "washing_machine_data" }
+];
 
-const LoadAndProcess = (dataSets: any[]) => {
-  console.log("loaded datasets", dataSets.length);
+let network: Perceptron = new Network(
+  imageByteSize,
+  128,
+  categories.length,
+  0.08
+);
+
+const LoadAndProcess = (dataSets: Uint8Array[]) => {
   const data: SampleData = {
     training: [],
     testing: []
   };
 
-  dataSets.forEach((dataset: Uint8Array, category) => {
-    for (var i = 0; i < totalSamples; i++) {
-      let sample: Sample = {
-        inputs: Array.from(
-          dataset.slice(i * imageByteSize, (i + 1) * imageByteSize)
-        ).map((v: number) => v / 255),
-        targets: Array(dataSets.length).fill(0),
-        category
-      };
+  dataSets.forEach(renderImage);
 
-      sample.targets[category] = 1;
+  setTimeout(() => {
+    dataSets.forEach((dataset: Uint8Array, category) => {
+      for (var i = 0; i < totalSamples; i++) {
+        let sample: Sample = {
+          inputs: Array.from(
+            dataset.slice(i * imageByteSize, (i + 1) * imageByteSize)
+          ).map((v: number) => v / 255),
+          targets: Array(dataSets.length).fill(0),
+          category
+        };
 
-      if (i < totalSamples * 0.8) {
-        data.training.push(sample);
-      } else {
-        data.testing.push(sample);
+        sample.targets[category] = 1;
+
+        if (i < totalSamples * 0.8) {
+          data.training.push(sample);
+        } else {
+          data.testing.push(sample);
+        }
       }
-    }
-  });
+    });
 
-  data.training = data.training.sort(() => (Math.random() > 0.5 ? -1 : 1));
-  data.testing = data.training.sort(() => (Math.random() > 0.5 ? -1 : 1));
+    data.training = data.training.sort(() => (Math.random() > 0.5 ? -1 : 1));
+    data.testing = data.training.sort(() => (Math.random() > 0.5 ? -1 : 1));
 
-  data.training.forEach((sample: Sample) => {
-    const inputs: number[][] = [...sample.inputs.map((v) => [v])];
-    const targets: number[][] = [...sample.targets.map((v) => [v])];
+    data.training.forEach((sample: Sample) => {
+      const inputs: number[][] = [...sample.inputs.map((v) => [v])];
+      const targets: number[][] = [...sample.targets.map((v) => [v])];
 
-    network.train(Matrix.from(inputs), Matrix.from(targets));
-  });
+      network.train(Matrix.from(inputs), Matrix.from(targets));
+    });
 
-  let correct = 0;
-  data.testing.forEach((sample: Sample) => {
-    const inputs: number[][] = [...sample.inputs.map((v) => [v])];
+    let correct = 0;
+    data.testing.forEach((sample: Sample) => {
+      const inputs: number[][] = [...sample.inputs.map((v) => [v])];
 
-    const prediction = network
-      .feedforward(Matrix.from(inputs))
-      .values.map((arr: number[]) => arr[0]);
+      const prediction = network
+        .feedforward(Matrix.from(inputs))
+        .values.map((arr: number[]) => arr[0]);
 
-    const predictedCategory = prediction.indexOf(Math.max(...prediction));
+      const predictedCategory = prediction.indexOf(Math.max(...prediction));
 
-    if (sample.category === predictedCategory) {
-      correct++;
-    }
-  });
+      if (sample.category === predictedCategory) {
+        correct++;
+      }
+    });
 
-  console.log(`correctness: ${(correct / data.testing.length) * 100}%`);
+    console.log(`correctness: ${(correct / data.testing.length) * 100}%`);
+  }, 0);
 };
 
 const W = 280;
@@ -224,7 +254,7 @@ if (guess) {
       Math.max(...prediction)
     );
 
-    console.log(CATEGORIES[predictedCategory]);
+    console.log(categories[predictedCategory].title);
   });
 }
 
@@ -241,11 +271,9 @@ const train = window.document.getElementById("train");
 
 if (train) {
   train.addEventListener("click", () => {
-    Promise.all([
-      loadData("./data/flower_data"),
-      loadData("./data/cake_data"),
-      loadData("./data/star_data")
-    ])
+    Promise.all(
+      categories.map((category: Category) => loadData(`data/${category.file}`))
+    )
       .then(LoadAndProcess)
       .catch(console.log);
   });
