@@ -74,17 +74,17 @@ const categories: Category[] = [
     title: "Banana",
     file: "banana_data"
   },
-  {
-    title: "Bed",
-    file: "bed_data"
-  },
-  { title: "Bus", file: "bus_data" },
+  // {
+  //   title: "Bed",
+  //   file: "bed_data"
+  // },
+  // { title: "Bus", file: "bus_data" },
   { title: "Cake", file: "cake_data" },
   { title: "Crab", file: "crab_data" },
   { title: "Donut", file: "donut_data" },
   { title: "Floor Lamp", file: "floor_lamp_data" },
   { title: "Flower", file: "flower_data" },
-  { title: "Hammer", file: "hammer_data" },
+  // { title: "Hammer", file: "hammer_data" },
   { title: "House", file: "house_data" },
   { title: "Mushroom", file: "mushroom_data" },
   { title: "Pizza", file: "pizza_data" },
@@ -99,7 +99,7 @@ let network: Perceptron = new Network(
   imageByteSize,
   128,
   categories.length,
-  0.08
+  0.05
 );
 
 const LoadAndProcess = (dataSets: Uint8Array[]) => {
