@@ -1,13 +1,12 @@
 import { Perceptron as Network } from "./Perceptron.js";
+import { randInt } from "./utils.js";
 import { Matrix } from "./matrix.js";
 const imgWidth = 28;
 const imgHeight = 28;
 const imageByteSize = imgWidth * imgHeight;
-const headerByteSize = 80;
-const cols = 32;
-const rows = 31;
-const totalSamples = 1000;
-let network = new Network(28 * 28, 64, 3, 0.05);
+const cols = 10;
+const rows = 10;
+const totalSamples = 2000;
 const loadData = (filePath) => {
     return new Promise((resolve, reject) => {
         var req = new XMLHttpRequest();
@@ -28,9 +27,10 @@ const renderImage = (imgData) => {
     canvas.height = imgHeight * rows;
     document.body.appendChild(canvas);
     const ctx = canvas.getContext("2d");
+    let offset = randInt(0, 2000 - cols * rows);
     for (var i = 0; i < cols * rows; i++) {
         const pixels = ctx.createImageData(imgWidth, imgHeight);
-        const imgOffset = imageByteSize * i;
+        const imgOffset = imageByteSize * (i + offset);
         for (var pixel = 0; pixel < imageByteSize; pixel++) {
             pixels.data[pixel * 4 + 3] = imgData[imgOffset + pixel];
         }
@@ -39,52 +39,75 @@ const renderImage = (imgData) => {
         ctx.putImageData(pixels, x * imgWidth, y * imgHeight);
     }
 };
-const CATEGORIES = {
-    0: "Flower",
-    1: "Cake",
-    2: "Star"
-};
+const categories = [
+    {
+        title: "Banana",
+        file: "banana_data"
+    },
+    {
+        title: "Bed",
+        file: "bed_data"
+    },
+    { title: "Bus", file: "bus_data" },
+    { title: "Cake", file: "cake_data" },
+    { title: "Crab", file: "crab_data" },
+    { title: "Donut", file: "donut_data" },
+    { title: "Floor Lamp", file: "floor_lamp_data" },
+    { title: "Flower", file: "flower_data" },
+    { title: "Hammer", file: "hammer_data" },
+    { title: "House", file: "house_data" },
+    { title: "Mushroom", file: "mushroom_data" },
+    { title: "Pizza", file: "pizza_data" },
+    { title: "Skull", file: "skull_data" },
+    { title: "Stairs", file: "stairs_data" },
+    { title: "Star", file: "star_data" },
+    { title: "Tornado", file: "tornado_data" },
+    { title: "Washing Machine", file: "washing_machine_data" }
+];
+let network = new Network(imageByteSize, 128, categories.length, 0.08);
 const LoadAndProcess = (dataSets) => {
-    console.log("loaded datasets", dataSets.length);
     const data = {
         training: [],
         testing: []
     };
-    dataSets.forEach((dataset, category) => {
-        for (var i = 0; i < totalSamples; i++) {
-            let sample = {
-                inputs: Array.from(dataset.slice(i * imageByteSize, (i + 1) * imageByteSize)).map((v) => v / 255),
-                targets: Array(dataSets.length).fill(0),
-                category
-            };
-            sample.targets[category] = 1;
-            if (i < totalSamples * 0.8) {
-                data.training.push(sample);
+    dataSets.forEach(renderImage);
+    setTimeout(() => {
+        dataSets.forEach((dataset, category) => {
+            for (var i = 0; i < totalSamples; i++) {
+                let sample = {
+                    inputs: Array.from(dataset.slice(i * imageByteSize, (i + 1) * imageByteSize)).map((v) => v / 255),
+                    targets: Array(dataSets.length).fill(0),
+                    category
+                };
+                sample.targets[category] = 1;
+                if (i < totalSamples * 0.8) {
+                    data.training.push(sample);
+                }
+                else {
+                    data.testing.push(sample);
+                }
             }
-            else {
-                data.testing.push(sample);
+        });
+        data.training = data.training.sort(() => (Math.random() > 0.5 ? -1 : 1));
+        data.testing = data.training.sort(() => (Math.random() > 0.5 ? -1 : 1));
+        data.training.forEach((sample) => {
+            const inputs = [...sample.inputs.map((v) => [v])];
+            const targets = [...sample.targets.map((v) => [v])];
+            network.train(Matrix.from(inputs), Matrix.from(targets));
+        });
+        let correct = 0;
+        data.testing.forEach((sample) => {
+            const inputs = [...sample.inputs.map((v) => [v])];
+            const prediction = network
+                .feedforward(Matrix.from(inputs))
+                .values.map((arr) => arr[0]);
+            const predictedCategory = prediction.indexOf(Math.max(...prediction));
+            if (sample.category === predictedCategory) {
+                correct++;
             }
-        }
-    });
-    data.training = data.training.sort(() => (Math.random() > 0.5 ? -1 : 1));
-    data.testing = data.training.sort(() => (Math.random() > 0.5 ? -1 : 1));
-    data.training.forEach((sample) => {
-        const inputs = [...sample.inputs.map((v) => [v])];
-        const targets = [...sample.targets.map((v) => [v])];
-        network.train(Matrix.from(inputs), Matrix.from(targets));
-    });
-    let correct = 0;
-    data.testing.forEach((sample) => {
-        const inputs = [...sample.inputs.map((v) => [v])];
-        const prediction = network
-            .feedforward(Matrix.from(inputs))
-            .values.map((arr) => arr[0]);
-        const predictedCategory = prediction.indexOf(Math.max(...prediction));
-        if (sample.category === predictedCategory) {
-            correct++;
-        }
-    });
-    console.log(`correctness: ${(correct / data.testing.length) * 100}%`);
+        });
+        console.log(`correctness: ${(correct / data.testing.length) * 100}%`);
+    }, 0);
 };
 const W = 280;
 const H = 280;
@@ -150,7 +173,7 @@ if (guess) {
             .feedforward(Matrix.from(inputs))
             .values.map((arr) => arr[0]);
         const predictedCategory = prediction.indexOf(Math.max(...prediction));
-        console.log(CATEGORIES[predictedCategory]);
+        console.log(categories[predictedCategory].title);
     });
 }
 const reset = window.document.getElementById("reset");
@@ -163,11 +186,7 @@ if (reset) {
 const train = window.document.getElementById("train");
 if (train) {
     train.addEventListener("click", () => {
-        Promise.all([
-            loadData("./data/flower_data"),
-            loadData("./data/cake_data"),
-            loadData("./data/star_data")
-        ])
+        Promise.all(categories.map((category) => loadData(`data/${category.file}`)))
             .then(LoadAndProcess)
             .catch(console.log);
     });
